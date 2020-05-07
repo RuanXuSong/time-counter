@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>倒计时</title>
+  </head>
+  <style>
+    @font-face {
+      font-family: "electronicFont";
+      src: url("font/font.ttf");
+    }
+    #timer {
+      display: none;
+      font-family: "electronicFont";
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 10px;
+      font-size: 40px;
+      background: url("./images/timer-bg.png");
+      width: 400px;
+      height: 100px;
+      background-size: cover;
+    }
+  </style>
+  <body>
+    <div id="timer"></div>
+  </body>
+  <script>
+    const getTimeNumber = timeString => {
+      return +timeString.slice(0, timeString.indexOf("m"));
+    };
+    const getTimeStamp = timeString => {
+      const minute = timeString.slice(0, timeString.indexOf("m"));
+      return minute * 60 * 1000;
+    };
+    const getFullTime = time => {
+      if (time < 10) {
+        return "0" + time;
+      }
+      return "" + time;
+    };
+    const getTimeString = timeStamp => {
+      const time = new Date(timeStamp - 8 * 60 * 60 * 1000);
+      return `${getFullTime(time.getHours())}:${getFullTime(
+        time.getMinutes()
+      )}:${getFullTime(time.getSeconds())}`;
+    };
+    // 传入倒计时时间容器，开始时间，结束时间的数组和间隔分钟，倒计时的时长
+    class CountDownTimer {
+      constructor(id, timeArea, timeInterval, timerCount) {
+        this.timeArea = timeArea;
+        this.dom = id ? document.getElementById(id) : null;
+        this.timeInterval = getTimeStamp(timeInterval);
+        this.timerCount = getTimeStamp(timerCount);
+        this.timeIntervalNumber = getTimeNumber(timeInterval);
+        this.timerCountNumber = getTimeNumber(timerCount);
+        this.countFlag = true;
+      }
+      // 初始化
+      init() {
+        this.dom.style.display = "flex";
+        this.dom.innerHTML = getTimeString(this.timerCount);
+        this.timer = setInterval(() => {
+          if (this.timerCount >= 1000) {
+            this.timerCount = this.timerCount - 1000;
+            this.dom.innerHTML = getTimeString(this.timerCount);
+          } else {
+            clearInterval(this.timer);
+          }
+        }, 1000);
+      }
+      // 判断是否在时间范围内
+      enabled() {
+        const nowdate = new Date();
+        const nowStamp = nowdate.getTime();
+        const nowYear = nowdate.getFullYear();
+        const nowMonth = getFullTime(nowdate.getMonth() + 1);
+        const nowDate = getFullTime(nowdate.getDate());
+        const nowHour = nowdate.getHours();
+        const [startTime, endTime] = this.timeArea;
+        const startDateStamp =
+          new Date(`${nowYear}-${nowMonth}-${nowDate}`).getTime() +
+          startTime * 60 * 60 * 1000 -
+          8 * 60 * 60 * 1000;
+        // 余数
+        const countSecond =
+          (nowdate.getTime() -
+            startDateStamp +
+            1 +
+            this.timerCountNumber * 60 * 1000) %
+          (this.timeIntervalNumber * 60000);
+        if (
+          nowStamp >= startDateStamp - 60 * 1000 &&
+          nowHour < endTime &&
+          countSecond < this.timerCountNumber * 60000
+        ) {
+          if (this.countFlag) {
+            this.timerCount = this.timerCountNumber * 60000 - countSecond;
+            this.countFlag = false;
+          }
+          return true;
+        }
+        this.countFlag = true;
+        return false;
+      }
+      // 清除显示
+      clear() {
+        this.dom.innerHTML = "";
+        this.dom.style.display = "none";
+      }
+    }
+    window.onload = function() {
+      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m");
+      let flag = true;
+      setInterval(() => {
+        if (timer.enabled() && flag) {
+          timer.init();
+          flag = false;
+        } else if (!timer.enabled()) {
+          timer.clear();
+          flag = true;
+        }
+      }, 1000);
+    };
+  </script>
+</html>

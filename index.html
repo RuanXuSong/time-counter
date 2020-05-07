@@ -49,7 +49,7 @@
     };
     // 传入倒计时时间容器，开始时间，结束时间的数组和间隔分钟，倒计时的时长
     class CountDownTimer {
-      constructor(id, timeArea, timeInterval, timerCount) {
+      constructor(id, timeArea, timeInterval, timerCount, callback) {
         this.timeArea = timeArea;
         this.dom = id ? document.getElementById(id) : null;
         this.timeInterval = getTimeStamp(timeInterval);
@@ -57,6 +57,7 @@
         this.timeIntervalNumber = getTimeNumber(timeInterval);
         this.timerCountNumber = getTimeNumber(timerCount);
         this.countFlag = true;
+        this.callback = callback ? callback : () => {};
       }
       // 初始化
       init() {
@@ -67,6 +68,7 @@
             this.timerCount = this.timerCount - 1000;
             this.dom.innerHTML = getTimeString(this.timerCount);
           } else {
+            this.callback();
             clearInterval(this.timer);
           }
         }, 1000);
@@ -109,6 +111,7 @@
       clear() {
         this.dom.innerHTML = "";
         this.dom.style.display = "none";
+        this.callback();
       }
     }
     window.onload = function() {

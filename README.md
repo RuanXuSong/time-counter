@@ -19,7 +19,7 @@
 
 ```js
   timer.init(); // 倒计时初始化
-  timer.clear(); // 清除倒计时，并执行callback函数
+  timer.clear(); // 清除倒计时
 ```
 
 以上就是一个简易的倒计时插件。

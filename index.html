@@ -111,11 +111,12 @@
       clear() {
         this.dom.innerHTML = "";
         this.dom.style.display = "none";
-        this.callback();
       }
     }
     window.onload = function() {
-      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m");
+      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m", () => {
+        alert("结束！");
+      });
       let flag = true;
       setInterval(() => {
         if (timer.enabled() && flag) {

@@ -11,11 +11,12 @@
 例如：
 ```js
   const timer = new CountDownTimer("timer", [9, 12], "20m", "1m", callback);
+  timer.start(); // 运行定时器
 ```
 
 以上代码表示初始化一个每天在 9 点到 12 点，每隔20分钟，在前1分钟开始倒计时的定时器。也可以在最后传入选择一个callback函数，将在倒计时结束后调用。
 
-其他API方法：
+一般只需要使用`start`方法即可，其他API方法：
 
 ```js
   timer.init(); // 倒计时初始化

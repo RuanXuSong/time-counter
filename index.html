@@ -86,7 +86,7 @@
           new Date(`${nowYear}-${nowMonth}-${nowDate}`).getTime() +
           startTime * 60 * 60 * 1000 -
           8 * 60 * 60 * 1000;
-        // 余数
+        // 计时余数
         const countSecond =
           (nowdate.getTime() -
             startDateStamp +
@@ -107,6 +107,19 @@
         this.countFlag = true;
         return false;
       }
+      // 运行定时器
+      start() {
+        let flag = true;
+        setInterval(() => {
+          if (this.enabled() && flag) {
+            this.init();
+            flag = false;
+          } else if (!this.enabled()) {
+            this.clear();
+            flag = true;
+          }
+        }, 1000);
+      }
       // 清除显示
       clear() {
         this.dom.innerHTML = "";
@@ -114,19 +127,8 @@
       }
     }
     window.onload = function() {
-      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m", () => {
-        alert("结束！");
-      });
-      let flag = true;
-      setInterval(() => {
-        if (timer.enabled() && flag) {
-          timer.init();
-          flag = false;
-        } else if (!timer.enabled()) {
-          timer.clear();
-          flag = true;
-        }
-      }, 1000);
+      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m");
+      timer.start();
     };
   </script>
 </html>

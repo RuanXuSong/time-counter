@@ -28,12 +28,30 @@
     <div id="timer"></div>
   </body>
   <script>
+    // 获得时间数字
     const getTimeNumber = timeString => {
-      return +timeString.slice(0, timeString.indexOf("m"));
+      return +timeString.slice(0, -1);
     };
+    // 时间单位对应时间戳
+    const timeMapObj = {
+      h: 60 * 60 * 1000,
+      m: 60 * 1000,
+      s: 1000
+    };
+
+    // 获得时间戳
     const getTimeStamp = timeString => {
-      const minute = timeString.slice(0, timeString.indexOf("m"));
-      return minute * 60 * 1000;
+      const regs = /([0-9]?[0-9][h|m|s])/g;
+      const timeArr = [];
+      let timeStamp = 0;
+      timeString.replace(regs, (_a, b) => {
+        timeArr.push(b);
+      });
+      timeArr.forEach(item => {
+        const unit = item.slice(-1);
+        timeStamp += timeMapObj[unit] * getTimeNumber(item);
+      });
+      return timeStamp;
     };
     const getFullTime = time => {
       if (time < 10) {
@@ -53,6 +71,7 @@
         this.timeArea = timeArea;
         this.dom = id ? document.getElementById(id) : null;
         this.timeInterval = getTimeStamp(timeInterval);
+        this.initalTimeCount = getTimeStamp(timerCount);
         this.timerCount = getTimeStamp(timerCount);
         this.timeIntervalNumber = getTimeNumber(timeInterval);
         this.timerCountNumber = getTimeNumber(timerCount);
@@ -64,12 +83,17 @@
         this.dom.style.display = "flex";
         this.dom.innerHTML = getTimeString(this.timerCount);
         this.timer = setInterval(() => {
-          if (this.timerCount >= 1000) {
-            this.timerCount = this.timerCount - 1000;
+          if (this.timerCount >= timeMapObj["s"]) {
+            this.timerCount = this.timerCount - timeMapObj["s"];
             this.dom.innerHTML = getTimeString(this.timerCount);
           } else {
             this.callback();
-            clearInterval(this.timer);
+            if (this.enabled()) {
+              this.timerCount = this.initalTimeCount;
+              this.dom.innerHTML = getTimeString(this.timerCount);
+            } else {
+              clearInterval(this.timer);
+            }
           }
         }, 1000);
       }
@@ -82,24 +106,28 @@
         const nowDate = getFullTime(nowdate.getDate());
         const nowHour = nowdate.getHours();
         const [startTime, endTime] = this.timeArea;
+        const todayStamp = new Date(
+          `${nowYear}-${nowMonth}-${nowDate}`
+        ).getTime();
         const startDateStamp =
-          new Date(`${nowYear}-${nowMonth}-${nowDate}`).getTime() +
-          startTime * 60 * 60 * 1000 -
-          8 * 60 * 60 * 1000;
+          todayStamp + getTimeStamp(startTime) - 8 * timeMapObj["h"];
+        const endDateStamp =
+          todayStamp + getTimeStamp(endTime) + 4 * timeMapObj["h"];
         // 计时余数
         const countSecond =
           (nowdate.getTime() -
             startDateStamp +
             1 +
-            this.timerCountNumber * 60 * 1000) %
-          (this.timeIntervalNumber * 60000);
+            this.timerCountNumber * timeMapObj["m"]) %
+          (this.timeIntervalNumber * timeMapObj["m"]);
         if (
-          nowStamp >= startDateStamp - 60 * 1000 &&
-          nowHour < endTime &&
-          countSecond < this.timerCountNumber * 60000
+          nowStamp >= startDateStamp - timeMapObj["m"] &&
+          nowStamp < endDateStamp &&
+          countSecond < this.timerCountNumber * timeMapObj["m"]
         ) {
           if (this.countFlag) {
-            this.timerCount = this.timerCountNumber * 60000 - countSecond;
+            this.timerCount =
+              this.timerCountNumber * timeMapObj["m"] - countSecond;
             this.countFlag = false;
           }
           return true;
@@ -127,7 +155,7 @@
       }
     }
     window.onload = function() {
-      const timer = new CountDownTimer("timer", [9, 23], "10m", "1m");
+      const timer = new CountDownTimer("timer", ["9h30m", "9h56m"], "2m", "1m");
       timer.start();
     };
   </script>
